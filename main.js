@@ -1,9 +1,9 @@
 /* ============================
    NAVBAR — scroll behavior
    ============================ */
-const navbar = document.getElementById('navbar');
+var navbar = document.getElementById('navbar');
 
-window.addEventListener('scroll', () => {
+window.addEventListener('scroll', function () {
   if (window.scrollY > 40) {
     navbar.classList.add('scrolled');
   } else {
@@ -14,22 +14,20 @@ window.addEventListener('scroll', () => {
 /* ============================
    HAMBURGER MENU
    ============================ */
-const hamburger = document.getElementById('hamburger');
-const mobileMenu = document.getElementById('mobileMenu');
-const mobileLinks = document.querySelectorAll('.mobile-link');
+var hamburger = document.getElementById('hamburger');
+var mobileMenu = document.getElementById('mobileMenu');
 
-hamburger.addEventListener('click', () => {
+hamburger.addEventListener('click', function () {
   mobileMenu.classList.toggle('open');
 });
 
-mobileLinks.forEach(link => {
-  link.addEventListener('click', () => {
+document.querySelectorAll('.mobile-link').forEach(function (link) {
+  link.addEventListener('click', function () {
     mobileMenu.classList.remove('open');
   });
 });
 
-// Close on outside click
-document.addEventListener('click', (e) => {
+document.addEventListener('click', function (e) {
   if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
     mobileMenu.classList.remove('open');
   }
@@ -38,81 +36,82 @@ document.addEventListener('click', (e) => {
 /* ============================
    SCROLL REVEAL
    ============================ */
-const revealEls = document.querySelectorAll('.reveal');
+function initReveal() {
+  var revealEls = document.querySelectorAll('.reveal');
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-revealEls.forEach(el => observer.observe(el));
-
-/* ============================
-   ACTIVE NAV LINK on scroll
-   ============================ */
-const sections = document.querySelectorAll('section[id]');
-const navLinks = document.querySelectorAll('.nav-links a');
-
-const sectionObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === '#' + entry.target.id) {
-          link.classList.add('active');
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
         }
       });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+    revealEls.forEach(function (el) {
+      observer.observe(el);
+    });
+  } else {
+    // Fallback: just show everything
+    revealEls.forEach(function (el) {
+      el.classList.add('visible');
+    });
+  }
+}
+
+/* ============================
+   HERO — reveal on load
+   ============================ */
+window.addEventListener('load', function () {
+  // Make hero elements visible immediately on load
+  document.querySelectorAll('#hero .reveal').forEach(function (el) {
+    setTimeout(function () {
+      el.classList.add('visible');
+    }, 80);
+  });
+
+  // Then init scroll reveal for everything else
+  initReveal();
+});
+
+/* ============================
+   SMOOTH ANCHOR SCROLL
+   ============================ */
+document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
+  anchor.addEventListener('click', function (e) {
+    var href = this.getAttribute('href');
+    var target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      var navHeight = navbar.offsetHeight;
+      var top = target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+      window.scrollTo({ top: top, behavior: 'smooth' });
     }
   });
-}, { threshold: 0.4 });
-
-sections.forEach(sec => sectionObserver.observe(sec));
+});
 
 /* ============================
    LIGHTBOX
    ============================ */
 function openLightbox(src, caption) {
-  const lb = document.getElementById('lightbox');
-  document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox-caption').textContent = caption;
+  var lb = document.getElementById('lightbox');
+  var img = document.getElementById('lightbox-img');
+  var cap = document.getElementById('lightbox-caption');
+  if (!lb || !img || !cap) return;
+  img.src = src;
+  cap.textContent = caption;
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
+  var lb = document.getElementById('lightbox');
+  if (!lb) return;
+  lb.classList.remove('open');
   document.body.style.overflow = '';
 }
 
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') closeLightbox();
-});
-
-/* ============================
-   SMOOTH ANCHOR with offset for fixed nav
-   ============================ */
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function (e) {
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      e.preventDefault();
-      const navHeight = navbar.offsetHeight;
-      const top = target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
-      window.scrollTo({ top, behavior: 'smooth' });
-    }
-  });
-});
-
-/* ============================
-   STAGGER HERO on load
-   ============================ */
-window.addEventListener('load', () => {
-  document.querySelectorAll('#hero .reveal').forEach(el => {
-    // Hero elements trigger on load, not scroll
-    setTimeout(() => el.classList.add('visible'), 100);
-  });
 });
