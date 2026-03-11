@@ -1,18 +1,18 @@
+// Add js-loaded to body IMMEDIATELY — this enables the CSS animations.
+// If JS never runs, body won't have this class and all content stays visible.
+document.body.classList.add('js-loaded');
+
 /* ============================
-   NAVBAR — scroll behavior
+   NAVBAR
    ============================ */
 var navbar = document.getElementById('navbar');
 
 window.addEventListener('scroll', function () {
-  if (window.scrollY > 40) {
-    navbar.classList.add('scrolled');
-  } else {
-    navbar.classList.remove('scrolled');
-  }
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
 });
 
 /* ============================
-   HAMBURGER MENU
+   HAMBURGER
    ============================ */
 var hamburger = document.getElementById('hamburger');
 var mobileMenu = document.getElementById('mobileMenu');
@@ -36,56 +36,40 @@ document.addEventListener('click', function (e) {
 /* ============================
    SCROLL REVEAL
    ============================ */
-function initReveal() {
-  var revealEls = document.querySelectorAll('.reveal');
+var revealEls = document.querySelectorAll('.reveal');
 
-  if ('IntersectionObserver' in window) {
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+// Show hero immediately
+document.querySelectorAll('#hero .reveal').forEach(function (el) {
+  el.classList.add('visible');
+});
 
-    revealEls.forEach(function (el) {
-      observer.observe(el);
+// Observe everything else
+if ('IntersectionObserver' in window) {
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
     });
-  } else {
-    // Fallback: just show everything
-    revealEls.forEach(function (el) {
-      el.classList.add('visible');
-    });
-  }
+  }, { threshold: 0.08 });
+
+  revealEls.forEach(function (el) {
+    observer.observe(el);
+  });
+} else {
+  revealEls.forEach(function (el) { el.classList.add('visible'); });
 }
 
 /* ============================
-   HERO — reveal on load
-   ============================ */
-window.addEventListener('load', function () {
-  // Make hero elements visible immediately on load
-  document.querySelectorAll('#hero .reveal').forEach(function (el) {
-    setTimeout(function () {
-      el.classList.add('visible');
-    }, 80);
-  });
-
-  // Then init scroll reveal for everything else
-  initReveal();
-});
-
-/* ============================
-   SMOOTH ANCHOR SCROLL
+   SMOOTH SCROLL
    ============================ */
 document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
   anchor.addEventListener('click', function (e) {
-    var href = this.getAttribute('href');
-    var target = document.querySelector(href);
+    var target = document.querySelector(this.getAttribute('href'));
     if (target) {
       e.preventDefault();
-      var navHeight = navbar.offsetHeight;
-      var top = target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+      var top = target.getBoundingClientRect().top + window.scrollY - navbar.offsetHeight - 8;
       window.scrollTo({ top: top, behavior: 'smooth' });
     }
   });
@@ -96,19 +80,14 @@ document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
    ============================ */
 function openLightbox(src, caption) {
   var lb = document.getElementById('lightbox');
-  var img = document.getElementById('lightbox-img');
-  var cap = document.getElementById('lightbox-caption');
-  if (!lb || !img || !cap) return;
-  img.src = src;
-  cap.textContent = caption;
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeLightbox() {
-  var lb = document.getElementById('lightbox');
-  if (!lb) return;
-  lb.classList.remove('open');
+  document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
 }
 
