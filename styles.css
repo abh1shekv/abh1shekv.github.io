@@ -56,12 +56,21 @@ ul { list-style: none; }
 /* ============================
    SCROLL REVEAL
    ============================ */
+/* Content always visible. JS adds .js-loaded to <body> to
+   enable the fade-in animation as a progressive enhancement only. */
 .reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
+  opacity: 1;
+  transform: none;
 }
-.reveal.visible { opacity: 1; transform: none; }
+.js-loaded .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.js-loaded .reveal.visible {
+  opacity: 1;
+  transform: none;
+}
 .delay-1 { transition-delay: 0.1s; }
 .delay-2 { transition-delay: 0.2s; }
 .delay-3 { transition-delay: 0.3s; }
